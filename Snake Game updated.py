@@ -2,24 +2,9 @@ from Tkinter import *
 from random import randint
 
 master = Tk()
-
-
+############## Buttons ###########################
 def startGame():
-    w = Canvas(master, width=600, height=550)
-    w.grid(row=0, column=0, columnspan=3, sticky=N+E+W+S)
-    rectangle = w.create_rectangle(0, 0, 30, 30, fill="Green", tags="rectangle")
-    food = w.create_oval(0, 0, 10, 10, fill="red", tags = "food")
-    w.move(food, randint(10, 590), randint(10, 540))
-    def move_rec(event):
-        if event.keysym == "Up":
-            w.move(rectangle, 0, -5)
-        elif event.keysym == "Down":
-            w.move(rectangle, 0, 5)
-        elif event.keysym == "Right":
-            w.move(rectangle, 5, 0)
-        elif event.keysym == "Left":
-            w.move(rectangle, -5, 0)
-    w.bind_all('<Key>', move_rec)
+    pass
 def stop():
     master.destroy()
 
@@ -40,22 +25,54 @@ b2.grid(row=1, column=1, sticky=N+E+W+S)
 b3 = Button(master, text="Instructions", command=instructions) 
 b3.grid(row=1, column=2, sticky=N+E+W+S)
 ###################################################
-#w = Canvas(master, width=600, height=550)
-#w.grid(row=0, column=0, columnspan=3, sticky=N+E+W+S)
-#rectangle = w.create_rectangle(0, 0, 30, 30, fill="Green", tags="rectangle")
-#food = w.create_oval(0, 0, 10, 10, fill="red", tags = "food")
-#w.move(food, randint(10, 590), randint(10, 540))
-###################################################
-#def move_rec(event):
- #   if event.keysym == "Up":
-  #      w.move(rectangle, 0, -5)
-   # elif event.keysym == "Down":
-    #    w.move(rectangle, 0, 5)
-    #elif event.keysym == "Right":
-     #   w.move(rectangle, 5, 0)
-    #elif event.keysym == "Left":
-     #   w.move(rectangle, -5, 0)
-#w.bind_all('<Key>', move_rec)
+w = Canvas(master, width=600, height=550)
+w.grid(row=0, column=0, columnspan=3, sticky=N+E+W+S)
+rectangle = w.create_rectangle(0, 0, 30, 30, fill="Green", tags="rectangle")
+
+food = w.create_oval(0, 0, 10, 10, fill="red", tags = "food")
+w.move(food, randint(10, 590), randint(10, 540))
+
+global score
+
+######################################################################
+# Boundary checker makes sure the snake doesn't go off screen. Destroys snake if it does.
+
+def boundary_checker():
+    for n in w.coords(rectangle):
+        if (n < 0.0):
+            master.destroy()
+        if (w.coords(rectangle)[2] > 600):
+            master.destroy()
+        if (w.coords(rectangle)[3] > 550):
+            master.destroy()
+
+# Food toucher
+def food_toucher():
+    score = 0
+    for n in w.coords(rectangle):
+        for m in w.coords(food):
+            if ((n[1] == m[1]) and (n[3] == m[3])):
+                w.move(food, randint(10, 590), randint(10, 540))
+                score += 1
+
+#######################################################################
+def move_rec(event):
+    if event.keysym == "Up":
+        w.move(rectangle, 0, -1)
+    elif event.keysym == "Down":
+        w.move(rectangle, 0, 1)
+    elif event.keysym == "Right":
+        w.move(rectangle, 1, 0)
+    elif event.keysym == "Left":
+        w.move(rectangle, -1, 0)
+    boundary_checker()
+    food_toucher()
+
+
+w.bind_all('<Key>', move_rec)
+print w.coords(food)
+
 ###################################################
 mainloop()
+
 
