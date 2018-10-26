@@ -107,6 +107,14 @@ def startGame():
         print "new ones:"
         print w.coords(rectangle), w.coords(food)
         print w.bbox("rectangle"), w.bbox("food")
+        
+        def food_toucher():
+            score = 0
+            n = w.coords(rectangle)
+            m = w.coords(food)
+            if ((n[1] == m[1]) and (n[3] == m[3])):
+                w.move(food, randint(10, 590), randint(10, 540))
+                score += 1
     
 
 # what's called when 'quit' is pressed:
