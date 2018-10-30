@@ -4,21 +4,34 @@ from random import randint
 
 master = Tk()
 
-# score that will be incremented as a
-# global variable in food_touched() function:
 score = 0
-
+length = 3
 def startGame():
     w = Canvas(master, width=600, height=550)
     w.grid(row=0, column=0, columnspan=3, sticky=N+E+W+S)
 
     # create rectangle (snake):
-    rectangle = w.create_rectangle(0, 0, 10, 10, fill="Green", tags="rectangle")
+    # create rectangle (snake):
+    snake = []
+    x1 = 0
+    y1 = 0
+    x2 = 10
+    y2 = 10
+    t = "0"
+    for i in range(0, length):
+        rectangle = w.create_rectangle(x1, y1, x2, y2, fill="Green", tags=t)
+        snake.append(rectangle)
+        x1 += 10
+        x2 += 10
+        i += 1
+        t += str(i)
+        print t
+    print snake
 
-    # create food and place it on canvas:
+    # create food:
     food = w.create_oval(0, 0, 10, 10, fill="red", tags = "food")
     w.move(food, randint(10, 590), randint(10, 540))
-    
+    print w.bbox("rectangle"), w.bbox("food")
     # function called when an arrow key is pressed:
     def move_snake(event):
         if event.keysym == "Up":
@@ -36,27 +49,36 @@ def startGame():
             if (w.coords(rectangle)[1] == 0):
                 master.destroy()
             else:
-                # bbox returns a list of integers that
-                # encapsulates/bounds the object.
-                # if they are EXACTLY equal, snake ate food.
-                # (every move function will behave this way.
-                #  improvements to come).
                 if w.bbox("rectangle") == w.bbox("food"):
                         food_toucher()
-                w.move(rectangle, 0, -1)
-                sleep(0.001)
-                w.update()
+                for i in range(len(snake)):
+                    w.move(snake[i], 0, -1)
+                    sleep(0.0015)
+                    w.update()
 
     def move_down():
         while (w.coords(rectangle)[3] <= 550):
             # game over if it hits bottom
             if (w.coords(rectangle)[3] == 550):
-                master.destroy()                
+                master.destroy()
             else:
                 if w.bbox("rectangle") == w.bbox("food"):
                         food_toucher()
-                w.move(rectangle, 0, 1)
-                sleep(0.001)
+                        
+                x1 = w.coords(snake[0])[0]
+                y1 = w.coords(snake[0])[1]
+                x2 = w.coords(snake[0])[2]
+                y2 = w.coords(snake[0])[3]
+                w.move(snake[0], 0, 10)
+                
+                for i in range(1, len(snake)):
+                    newx1 = w.coords(snake[i])[0]
+                    newy1 = w.coords(snake[i])[1]
+                    newx2 = w.coords(snake[i])[2]
+                    newy2 = w.coords(snake[i])[3]
+                    w.coords(snake[i], x1, y1, x2, y2)
+                    
+                sleep(0.1)
                 w.update()
 
     def move_left():
@@ -67,9 +89,10 @@ def startGame():
             else:
                 if w.bbox("rectangle") == w.bbox("food"):
                         food_toucher()
-                w.move(rectangle, -1, 0)
-                sleep(0.001)
-                w.update()
+                for i in range(len(snake)):
+                    w.move(snake[i], -1, 0)
+                    sleep(0.0015)
+                    w.update()
 
     def move_right():
         while (w.coords(rectangle)[2] <= 600):
@@ -79,9 +102,21 @@ def startGame():
             else:
                 if w.bbox("rectangle") == w.bbox("food"):
                         food_toucher()
-                w.move(rectangle, 1, 0)
-                sleep(0.001)
-                w.update()
+
+                x1 = w.coords(snake[0])[0]
+                y1 = w.coords(snake[0])[1]
+                x2 = w.coords(snake[0])[2]
+                y2 = w.coords(snake[0])[3]
+                w.move(snake[0], 10, 0)
+                
+                for i in range(1, len(snake)):
+                    newx1 = w.coords(snake[i])[0]
+                    newy1 = w.coords(snake[i])[1]
+                    newx2 = w.coords(snake[i])[2]
+                    newy2 = w.coords(snake[i])[3]
+                    w.coords(snake[i], x1, y1, x2, y2)
+                    sleep(0.1)
+                    w.update()
                 
     w.bind_all('<Key>', move_snake)
     
@@ -107,15 +142,9 @@ def startGame():
         print "new ones:"
         print w.coords(rectangle), w.coords(food)
         print w.bbox("rectangle"), w.bbox("food")
-        
-        def food_toucher():
-            score = 0
-            n = w.coords(rectangle)
-            m = w.coords(food)
-            if ((n[1] == m[1]) and (n[3] == m[3])):
-                w.move(food, randint(10, 590), randint(10, 540))
-                score += 1
-    
+
+
+
 
 # what's called when 'quit' is pressed:
 def stop():
@@ -131,7 +160,7 @@ def instructions():
     
     display.pack()
 
-######################### Buttons #################################
+############### Buttons ##################
 
 # Start button:  
 b1 = Button(master, text="Start Game", command=startGame)
@@ -145,10 +174,13 @@ b2.grid(row=1, column=1, sticky=N+E+W+S)
 b3 = Button(master, text="Instructions", command=instructions) 
 b3.grid(row=1, column=2, sticky=N+E+W+S)
 
-###################### create a GUI window#########################
+###################### create a GUI window #########################
 
 # set the title
 master.title("SNAKEGAME..RELOADED")
+
+# set the size
+#master.geometry("600x550")
 
 # start the GUI
 master.mainloop()
