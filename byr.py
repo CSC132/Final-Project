@@ -12,15 +12,15 @@ def startGame():
 
     # create rectangle (snake):
     snake = []
-    x1 = 0
+    x1 = 20
     y1 = 0
-    x2 = 10
+    x2 = 30
     y2 = 10
     head = w.create_rectangle(x1, y1, x2, y2, fill="Green", tags="head")
     snake.append(head)
     for i in range(1, length):
-        x1 += 10
-        x2 += 10
+        x1 -= 10
+        x2 -= 10
         rectangle = w.create_rectangle(x1, y1, x2, y2, fill="Green")
         snake.append(rectangle)
 
@@ -37,7 +37,6 @@ def startGame():
     food = w.create_oval(0, 0, 10, 10, fill="red", tags = "food")
     w.move(food, foodX, foodY)
 
-    
     # function called when an arrow key is pressed:
     def move_snake(event):
         if event.keysym == "Up":
@@ -55,18 +54,8 @@ def startGame():
             if (w.coords(head)[1] == 0):
                 master.destroy()
             else:
-                if w.bbox("head") == w.bbox("food"):
-                        food_toucher()
-
-                x1 = w.coords(head)[0]
-                y1 = w.coords(head)[1]
-                x2 = w.coords(head)[2]
-                y2 = w.coords(head)[3]
-                w.move(head, 0, -10)
-                
-                for i in range(1, len(snake)):
-                    x1, y1, x2, y2 = follow_head(i, x1, y1, x2, y2)
-                    
+                check_food()
+                move(0, -10)
                 sleep(0.1)
                 w.update()
 
@@ -76,20 +65,10 @@ def startGame():
             if (w.coords(head)[3] == 550):
                 master.destroy()
             else:
-                if w.bbox("head") == w.bbox("food"):
-                        food_toucher()
-
-                x1 = w.coords(head)[0]
-                y1 = w.coords(head)[1]
-                x2 = w.coords(head)[2]
-                y2 = w.coords(head)[3]
-                w.move(head, 0, 10)
-                
-                for i in range(1, len(snake)):
-                    x1, y1, x2, y2 = follow_head(i, x1, y1, x2, y2)
-                    
+                check_food()
+                move(0, 10)                    
                 sleep(0.1)
-                w.update()       
+                w.update()  
 
     def move_left():
         while (w.coords(head)[0] >= 0):
@@ -97,18 +76,8 @@ def startGame():
             if (w.coords(head)[0] == 0):
                 master.destroy()
             else:
-                if w.bbox("head") == w.bbox("food"):
-                        food_toucher()
-
-                x1 = w.coords(head)[0]
-                y1 = w.coords(head)[1]
-                x2 = w.coords(head)[2]
-                y2 = w.coords(head)[3]
-                w.move(head, -10, 0)
-                
-                for i in range(1, len(snake)):
-                    x1, y1, x2, y2 = follow_head(i, x1, y1, x2, y2)
-                    
+                check_food()                        
+                move(-10, 0)
                 sleep(0.1)
                 w.update()
 
@@ -118,32 +87,44 @@ def startGame():
             if (w.coords(head)[2] == 600):
                 master.destroy()
             else:
-                if w.bbox("head") == w.bbox("food"):
-                        food_toucher()
-
-                x1 = w.coords(head)[0]
-                y1 = w.coords(head)[1]
-                x2 = w.coords(head)[2]
-                y2 = w.coords(head)[3]
-                w.move(head, 10, 0)
-                
-                for i in range(1, len(snake)):
-                    x1, y1, x2, y2 = follow_head(i, x1, y1, x2, y2)
-                    
+                check_food()
+                move(10, 0)
                 sleep(0.1)
                 w.update()
+
+    def check_food():
+        if w.bbox("head") == w.bbox("food"):
+            food_toucher()
+
+    def move(x, y):
+        # this function moves the head, and keeps track of the
+        # coordinates of the previous body part. We need to keep
+        # track of the previous body parts because every body part
+        # but the head will be moving to the previous body part's
+        # coordinates.
+        x1 = w.coords(head)[0]
+        y1 = w.coords(head)[1]
+        x2 = w.coords(head)[2]
+        y2 = w.coords(head)[3]
+        w.move(head, x, y)
+        
+        for i in range(1, len(snake)):
+            x1, y1, x2, y2 = follow_head(i, x1, y1, x2, y2)
+            
+            if w.coords(head) == w.coords(snake[i]):
+                master.destroy()      
                 
     def follow_head(i, x1, y1, x2, y2):
-            newx1 = w.coords(snake[i])[0]
-            newy1 = w.coords(snake[i])[1]
-            newx2 = w.coords(snake[i])[2]
-            newy2 = w.coords(snake[i])[3]
-            w.coords(snake[i], x1, y1, x2, y2)
-            x1 = newx1
-            y1 = newy1
-            x2 = newx2
-            y2 = newy2
-            return x1, y1, x2, y2 
+        newx1 = w.coords(snake[i])[0]
+        newy1 = w.coords(snake[i])[1]
+        newx2 = w.coords(snake[i])[2]
+        newy2 = w.coords(snake[i])[3]
+        w.coords(snake[i], x1, y1, x2, y2)
+        x1 = newx1
+        y1 = newy1
+        x2 = newx2
+        y2 = newy2
+        return x1, y1, x2, y2            
     
     def food_toucher():
         # gives the coordinates where the food was touched at:
@@ -165,7 +146,6 @@ def startGame():
         w.coords(food, new_x, new_y, new_x + 10, new_y + 10)
         print "new ones:"
         print w.bbox("head"), w.bbox("food")
-
         grow()
 
     # w.coords returns the x1, y1, x2, y2 values respectively,
