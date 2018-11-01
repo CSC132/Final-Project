@@ -5,7 +5,14 @@ from random import randint, choice
 master = Tk()
 
 score = 0
-length = 3
+speed = 0.1
+snakeLength = 3
+
+goingLeft = False
+goingRight = False
+goingUp = False
+goingDown = False
+
 def startGame():
     w = Canvas(master, width=600, height=550)
     w.grid(row=0, column=0, columnspan=3, sticky=N+E+W+S)
@@ -18,7 +25,7 @@ def startGame():
     y2 = 10
     head = w.create_rectangle(x1, y1, x2, y2, fill="Green", tags="head")
     snake.append(head)
-    for i in range(1, length):
+    for i in range(1, snakeLength):
         x1 -= 10
         x2 -= 10
         rectangle = w.create_rectangle(x1, y1, x2, y2, fill="Green")
@@ -49,48 +56,76 @@ def startGame():
             move_right()
 
     def move_up():
-        while (w.coords(head)[1] >= 0):
-            # game over if it hits top
-            if (w.coords(head)[1] == 0):
-                master.destroy()
-            else:
-                check_food()
-                move(0, -10)
-                sleep(0.1)
-                w.update()
+        global goingDown, goingUp, goingLeft, goingRight
+        goingUp = True
+        goingRight = False
+        goingLeft = False
+
+        # only move up if it's not moving down
+        if (goingDown == False):
+            while (w.coords(head)[1] >= 0):
+                # game over if it hits top
+                if (w.coords(head)[1] == 0):
+                    master.destroy()
+                else:
+                    check_food()
+                    move(0, -10)
+                    sleep(speed)
+                    w.update()
 
     def move_down():
-        while (w.coords(head)[3] <= 550):
-            # game over if it hits bottom
-            if (w.coords(head)[3] == 550):
-                master.destroy()
-            else:
-                check_food()
-                move(0, 10)                    
-                sleep(0.1)
-                w.update()  
+        global goingDown, goingUp, goingLeft, goingRight
+        goingDown = True
+        goingRight = False
+        goingLeft = False
+
+        # only move down if it's not moving up
+        if (goingUp == False):
+            while (w.coords(head)[3] <= 550):
+                # game over if it hits bottom
+                if (w.coords(head)[3] == 550):
+                    master.destroy()
+                else:
+                    check_food()
+                    move(0, 10)                    
+                    sleep(speed)
+                    w.update()
 
     def move_left():
-        while (w.coords(head)[0] >= 0):
-            # game over if it hits left wall
-            if (w.coords(head)[0] == 0):
-                master.destroy()
-            else:
-                check_food()                        
-                move(-10, 0)
-                sleep(0.1)
-                w.update()
+        global goingDown, goingUp, goingLeft, goingRight
+        goingLeft = True
+        goingUp = False
+        goingDown = False
+
+        # only move left if it's not moving right        
+        if (goingRight == False):
+            while (w.coords(head)[0] >= 0):
+                # game over if it hits left wall
+                if (w.coords(head)[0] == 0):
+                    master.destroy()
+                else:
+                    check_food()                        
+                    move(-10, 0)
+                    sleep(speed)
+                    w.update()
 
     def move_right():
-        while (w.coords(head)[2] <= 600):
-            # game over if it hits right wall
-            if (w.coords(head)[2] == 600):
-                master.destroy()
-            else:
-                check_food()
-                move(10, 0)
-                sleep(0.1)
-                w.update()
+        global goingDown, goingUp, goingLeft, goingRight
+        goingRight = True
+        goingUp = False
+        goingDown = False
+
+        # only move right if it's not moving left        
+        if (goingLeft == False):
+            while (w.coords(head)[2] <= 600):
+                # game over if it hits right wall
+                if (w.coords(head)[2] == 600):
+                    master.destroy()
+                else:
+                    check_food()
+                    move(10, 0)
+                    sleep(speed)
+                    w.update()
 
     def check_food():
         if w.bbox("head") == w.bbox("food"):
@@ -135,6 +170,12 @@ def startGame():
         global score
         score += 1
         print score
+        
+        global speed
+        if (score >= 5):
+            speed = 0.05
+        elif (score >= 15):
+            speed = 0.001
 
         # new coordinates:
         new_x = choice(listX)
