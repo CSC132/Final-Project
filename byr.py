@@ -5,7 +5,7 @@ from random import randint, choice
 master = Tk()
 
 score = 0
-speed = 0.1
+speed = 0.08
 snakeLength = 3
 
 goingLeft = False
@@ -14,8 +14,13 @@ goingUp = False
 goingDown = False
 
 def startGame():
-    w = Canvas(master, width=600, height=550)
+    w = Canvas(master, width=800, height=450)
     w.grid(row=0, column=0, columnspan=3, sticky=N+E+W+S)
+    master.attributes("-fullscreen", True)
+
+    scoreboard = Frame(master, width=50, height=50)
+    Label(scoreboard, text="Score: {}".format(score)).grid()
+    scoreboard.grid(column=3, row=1, sticky=N+E+W+S)
 
     # create rectangle (snake):
     snake = []
@@ -35,8 +40,8 @@ def startGame():
     def f(x):
         return (x % 10 == 0)
 
-    listX = filter(f, range(10, 590))
-    listY = filter(f, range(10, 540))
+    listX = filter(f, range(10, 790))
+    listY = filter(f, range(10, 440))
 
     foodX = choice(listX)
     foodY = choice(listY)
@@ -81,9 +86,9 @@ def startGame():
 
         # only move down if it's not moving up
         if (goingUp == False):
-            while (w.coords(head)[3] <= 550):
+            while (w.coords(head)[3] <= 450):
                 # game over if it hits bottom
-                if (w.coords(head)[3] == 550):
+                if (w.coords(head)[3] == 450):
                     master.destroy()
                 else:
                     check_food()
@@ -117,9 +122,9 @@ def startGame():
 
         # only move right if it's not moving left        
         if (goingLeft == False):
-            while (w.coords(head)[2] <= 600):
+            while (w.coords(head)[2] <= 800):
                 # game over if it hits right wall
-                if (w.coords(head)[2] == 600):
+                if (w.coords(head)[2] == 800):
                     master.destroy()
                 else:
                     check_food()
@@ -170,6 +175,11 @@ def startGame():
         global score
         score += 1
         print score
+
+        scoreboard.destroy()
+        scoreboard1 = Frame(master, width=50, height=50)
+        Label(scoreboard1, text="Score: {}".format(score)).grid()
+        scoreboard1.grid(column=3, row=1, sticky=N+E+W+S)
         
         global speed
         if (score >= 5):
@@ -206,10 +216,10 @@ def stop():
 # what's called when 'instructions' is pressed:
 def instructions():
     newwin = Toplevel(master)
-    display = Label(newwin, text="The goal of The Snake game is to eat the fruit to make the snake longer. " \
-                     "Use the arrow keys to move the snake around the screen. " \
-                    "If the snake's head touches any part of its body, the game is over, so be careful!",
-                    length=100, width=100)
+    display = Label(newwin, text="The goal of The Snake game is to eat the fruit\n to make the snake longer. " \
+                     "\n\nUse the arrow keys to move the \nsnake around the screen. " \
+                    "\n\nIf the snake's head touches any part of its body,\n the game is over, so be careful!",
+                    height=20, width=40)
     
     display.pack()
 
