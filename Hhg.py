@@ -226,7 +226,7 @@ def startGame():
         
         if (score <= -1):
             print "You've been poisoned"
-            master.destroy()
+            reset()
         
 
         # new coordinates:
