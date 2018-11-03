@@ -1,3 +1,16 @@
+    # destroys current snake, cleans up score and
+    # direction sentinels, and calls startGame() again.
+    def reset():
+        global score, goingDown, goingUp, goingLeft, goingRight
+        w.destroy()
+        score = 0
+        goingLeft = False
+        goingRight = False
+        goingUp = False
+        goingDown = False
+        startGame()
+
+
 from Tkinter import *
 from time import sleep
 from random import randint, choice
