@@ -17,11 +17,11 @@ goingDown = False
 def startGame():
     global score
     w = Canvas(master, width=600, height=550)
-    w.grid(row=0, column=0, columnspan=3, sticky=N+E+W+S)
+    w.grid(row=1, column=0, columnspan=3, sticky=N+E+W+S)
     master.attributes("-fullscreen", True)
     
     scoreboard = Label(master, text="Score: {}".format(score))
-    scoreboard.grid(row=1, column=1, sticky=N)
+    scoreboard.grid(row=0, column=1, sticky=N)
     
     # create rectangle (snake):
     snake = []
@@ -77,7 +77,7 @@ def startGame():
             while (w.coords(head)[1] >= 0):
                 # game over if it hits top
                 if (w.coords(head)[1] == 0):
-                    master.destroy()
+                    reset()
                 else:
                     check_item()
                     move(0, -10)
@@ -95,7 +95,7 @@ def startGame():
             while (w.coords(head)[3] <= 550):
                 # game over if it hits bottom
                 if (w.coords(head)[3] == 550):
-                    master.destroy()
+                    reset()
                 else:
                     check_item()
                     move(0, 10)                    
@@ -113,7 +113,7 @@ def startGame():
             while (w.coords(head)[0] >= 0):
                 # game over if it hits left wall
                 if (w.coords(head)[0] == 0):
-                    master.destroy()
+                    reset()
                 else:
                     check_item()                        
                     move(-10, 0)
@@ -131,7 +131,7 @@ def startGame():
             while (w.coords(head)[2] <= 600):
                 # game over if it hits right wall
                 if (w.coords(head)[2] == 600):
-                    master.destroy()
+                    reset()
                 else:
                     check_item()
                     move(10, 0)
@@ -160,7 +160,7 @@ def startGame():
             x1, y1, x2, y2 = follow_head(i, x1, y1, x2, y2)
             
             if w.coords(head) == w.coords(snake[i]):
-                master.destroy()      
+                reset()      
                 
     def follow_head(i, x1, y1, x2, y2):
         newx1 = w.coords(snake[i])[0]
@@ -196,13 +196,16 @@ def startGame():
             speed = 0.001
 
         # new coordinates:
-        new_x = choice(listX)
-        new_y = choice(listY)
+        food_x = choice(listX)
+        food_y = choice(listY)
+        poison_x = choice(listX)
+        poison_y = choice(listY)
         
         # relocates the food somewhere else in the canvas.
         # to keep its size of 10 (decided upon create_oval creation) consistent,
         # use new_x and new_x + 10 when plotting new x values, likewise for y.
-        w.coords(food, new_x, new_y, new_x + 10, new_y + 10)
+        w.coords(food, food_x, food_y, food_x + 10, food_y + 10)
+        w.coords(poison, poison_x, poison_y, poison_x + 10, poison_y + 10)
         print "new ones:"
         print w.bbox("head"), w.bbox("food")
         grow()
@@ -248,6 +251,17 @@ def startGame():
         x1, y1, x2, y2 = w.coords(snake[len(snake)-1])
         rectangle = w.create_rectangle(x1, y1, x2, y2, fill="Green")
         snake.append(rectangle)
+    # destroys current snake, cleans up score and
+    # direction sentinels, and calls statGame() again.
+    def reset():
+        global score, goingDown, goingUp, goingLeft
+        w.destroy()
+        score = 0
+        goingLeft = False
+        goingRight = False
+        goingUp = False
+        goingDown = False
+        startGame()
         
     w.bind_all('<Key>', move_snake)
 
@@ -270,15 +284,15 @@ def instructions():
 
 # Start button:  
 b1 = Button(master, text="Start Game", command=startGame)
-b1.grid(row=1, column=0, sticky=N+E+W+S)
+b1.grid(row=2, column=0, sticky=N+E+W+S)
 
 # Quit button:
 b2 = Button(master, text="Quit", command=stop)
-b2.grid(row=1, column=1, sticky=N+E+W+S)
+b2.grid(row=2, column=1, sticky=N+E+W+S)
 
 # Instructions button:
 b3 = Button(master, text="Instructions", command=instructions) 
-b3.grid(row=1, column=2, sticky=N+E+W+S)
+b3.grid(row=2, column=2, sticky=N+E+W+S)
 
 ###################### create a GUI window #########################
 
