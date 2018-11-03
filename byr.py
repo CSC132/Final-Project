@@ -5,8 +5,9 @@ from random import randint, choice
 master = Tk()
 
 score = 0
-speed = 0.08
+speed = 0.08/2
 snakeLength = 3
+moveCount = 0
 
 goingLeft = False
 goingRight = False
@@ -15,12 +16,11 @@ goingDown = False
 
 def startGame():
     w = Canvas(master, width=800, height=450)
-    w.grid(row=0, column=0, columnspan=3, sticky=N+E+W+S)
+    w.grid(row=1, column=0, columnspan=3, sticky=N+E+W+S)
     master.attributes("-fullscreen", True)
 
-    scoreboard = Frame(master, width=50, height=50)
-    Label(scoreboard, text="Score: {}".format(score)).grid()
-    scoreboard.grid(column=3, row=1, sticky=N+E+W+S)
+    scoreboard = Label(master, text="Score: {}".format(score))
+    scoreboard.grid(row=0, column=1, sticky=N)
 
     # create rectangle (snake):
     snake = []
@@ -51,6 +51,8 @@ def startGame():
 
     # function called when an arrow key is pressed:
     def move_snake(event):
+##        global moveCount
+##        moveCount += 1
         if event.keysym == "Up":
             move_up()
         elif event.keysym == "Down":
@@ -177,9 +179,8 @@ def startGame():
         print score
 
         scoreboard.destroy()
-        scoreboard1 = Frame(master, width=50, height=50)
-        Label(scoreboard1, text="Score: {}".format(score)).grid()
-        scoreboard1.grid(column=3, row=1, sticky=N+E+W+S)
+        newScoreboard = Label(master, text="Score: {}".format(score))
+        newScoreboard.grid(row=0, column=1, sticky=N)
         
         global speed
         if (score >= 5):
@@ -207,6 +208,10 @@ def startGame():
         rectangle = w.create_rectangle(x1, y1, x2, y2, fill="Green")
         snake.append(rectangle)
 
+    def getScore():
+        global score
+        return score
+
     w.bind_all('<Key>', move_snake)
 
 # what's called when 'quit' is pressed:
@@ -227,15 +232,15 @@ def instructions():
 
 # Start button:  
 b1 = Button(master, text="Start Game", command=startGame)
-b1.grid(row=1, column=0, sticky=N+E+W+S)
+b1.grid(row=2, column=0, sticky=N+E+W+S)
 
 # Quit button:
 b2 = Button(master, text="Quit", command=stop)
-b2.grid(row=1, column=1, sticky=N+E+W+S)
+b2.grid(row=2, column=1, sticky=N+E+W+S)
 
 # Instructions button:
 b3 = Button(master, text="Instructions", command=instructions) 
-b3.grid(row=1, column=2, sticky=N+E+W+S)
+b3.grid(row=2, column=2, sticky=N+E+W+S)
 
 ###################### create a GUI window #########################
 
