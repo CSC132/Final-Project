@@ -1,16 +1,3 @@
-    # destroys current snake, cleans up score and
-    # direction sentinels, and calls startGame() again.
-    def reset():
-        global score, goingDown, goingUp, goingLeft, goingRight
-        w.destroy()
-        score = 0
-        goingLeft = False
-        goingRight = False
-        goingUp = False
-        goingDown = False
-        startGame()
-
-
 from Tkinter import *
 from time import sleep
 from random import randint, choice
@@ -18,7 +5,7 @@ from random import randint, choice
 master = Tk()
 
 score = 0
-speed = 0.08/2
+speed = 0.05
 snakeLength = 3
 moveCount = 0
 
@@ -28,13 +15,14 @@ goingUp = False
 goingDown = False
 
 def startGame():
-    w = Canvas(master, width=800, height=450)
+    global score
+    w = Canvas(master, width=600, height=550)
     w.grid(row=1, column=0, columnspan=3, sticky=N+E+W+S)
     master.attributes("-fullscreen", True)
-
+    
     scoreboard = Label(master, text="Score: {}".format(score))
     scoreboard.grid(row=0, column=1, sticky=N)
-
+    
     # create rectangle (snake):
     snake = []
     x1 = 20
@@ -53,19 +41,22 @@ def startGame():
     def f(x):
         return (x % 10 == 0)
 
-    listX = filter(f, range(10, 790))
-    listY = filter(f, range(10, 440))
+    listX = filter(f, range(10, 590))
+    listY = filter(f, range(10, 540))
 
     foodX = choice(listX)
     foodY = choice(listY)
+    poisonX = choice(listX)
+    poisonY = choice(listY)
     
     food = w.create_oval(0, 0, 10, 10, fill="red", tags = "food")
     w.move(food, foodX, foodY)
-
+    poison = w.create_oval(0, 0, 10, 10, fill="purple", tags="poison")
+    w.move(poison, poisonX, poisonY)
     # function called when an arrow key is pressed:
     def move_snake(event):
-##        global moveCount
-##        moveCount += 1
+  ##      global moveCount
+  ##      moveCount += 1
         if event.keysym == "Up":
             move_up()
         elif event.keysym == "Down":
@@ -86,9 +77,9 @@ def startGame():
             while (w.coords(head)[1] >= 0):
                 # game over if it hits top
                 if (w.coords(head)[1] == 0):
-                    master.destroy()
+                    reset()
                 else:
-                    check_food()
+                    check_item()
                     move(0, -10)
                     sleep(speed)
                     w.update()
@@ -101,12 +92,12 @@ def startGame():
 
         # only move down if it's not moving up
         if (goingUp == False):
-            while (w.coords(head)[3] <= 450):
+            while (w.coords(head)[3] <= 550):
                 # game over if it hits bottom
-                if (w.coords(head)[3] == 450):
-                    master.destroy()
+                if (w.coords(head)[3] == 550):
+                    reset()
                 else:
-                    check_food()
+                    check_item()
                     move(0, 10)                    
                     sleep(speed)
                     w.update()
@@ -122,9 +113,9 @@ def startGame():
             while (w.coords(head)[0] >= 0):
                 # game over if it hits left wall
                 if (w.coords(head)[0] == 0):
-                    master.destroy()
+                    reset()
                 else:
-                    check_food()                        
+                    check_item()                        
                     move(-10, 0)
                     sleep(speed)
                     w.update()
@@ -137,19 +128,21 @@ def startGame():
 
         # only move right if it's not moving left        
         if (goingLeft == False):
-            while (w.coords(head)[2] <= 800):
+            while (w.coords(head)[2] <= 600):
                 # game over if it hits right wall
-                if (w.coords(head)[2] == 800):
-                    master.destroy()
+                if (w.coords(head)[2] == 600):
+                    reset()
                 else:
-                    check_food()
+                    check_item()
                     move(10, 0)
                     sleep(speed)
                     w.update()
 
-    def check_food():
+    def check_item():
         if w.bbox("head") == w.bbox("food"):
             food_toucher()
+        elif w.bbox("head") == w.bbox("poison"):
+            poison_toucher()
 
     def move(x, y):
         # this function moves the head, and keeps track of the
@@ -167,7 +160,7 @@ def startGame():
             x1, y1, x2, y2 = follow_head(i, x1, y1, x2, y2)
             
             if w.coords(head) == w.coords(snake[i]):
-                master.destroy()      
+                reset()      
                 
     def follow_head(i, x1, y1, x2, y2):
         newx1 = w.coords(snake[i])[0]
@@ -190,28 +183,71 @@ def startGame():
         global score
         score += 1
         print score
-
+        
         scoreboard.destroy()
         newScoreboard = Label(master, text="Score: {}".format(score))
         newScoreboard.grid(row=0, column=1, sticky=N)
         
+        
         global speed
         if (score >= 5):
-            speed = 0.05
+            speed = 0.05/2
         elif (score >= 15):
-            speed = 0.001
+            speed /= 0.25/2
 
         # new coordinates:
-        new_x = choice(listX)
-        new_y = choice(listY)
+        food_x = choice(listX)
+        food_y = choice(listY)
+        poison_x = choice(listX)
+        poison_y = choice(listY)
         
         # relocates the food somewhere else in the canvas.
         # to keep its size of 10 (decided upon create_oval creation) consistent,
         # use new_x and new_x + 10 when plotting new x values, likewise for y.
-        w.coords(food, new_x, new_y, new_x + 10, new_y + 10)
+        w.coords(food, food_x, food_y, food_x + 10, food_y + 10)
+        w.coords(poison, poison_x, poison_y, poison_x + 10, poison_y + 10)
         print "new ones:"
         print w.bbox("head"), w.bbox("food")
         grow()
+        
+    def poison_toucher():
+        # gives the coordinates where the food was touched at:
+        print "poison touched at:"
+        print w.bbox("head"), w.bbox("poison")
+
+        # increments and prints score:
+        global score
+        score -= 1
+        print score
+        
+        scoreboard.destroy()
+        newScoreboard = Label(master, text="Score: {}".format(score))
+        newScoreboard.grid(row=0, column=1, sticky=N)
+
+        global speed            
+        if (score < 0):
+            print "You've been poisoned"
+            reset()
+        if (score <= 5):
+            speed *= 2
+        elif (score <= 15):
+            speed *= 2
+        
+
+        # new coordinates:
+        food_x = choice(listX)
+        food_y = choice(listY)
+        poison_x = choice(listX)
+        poison_y = choice(listY)
+        
+        
+        # relocates the food somewhere else in the canvas.
+        # to keep its size of 10 (decided upon create_oval creation) consistent,
+        # use new_x and new_x + 10 when plotting new x values, likewise for y.
+        w.coords(food, food_x, food_y, food_x + 10, food_y + 10)
+        w.coords(poison, poison_x, poison_y, poison_x + 10, poison_y + 10)
+        print "new ones:"
+        print w.bbox("head"), w.bbox("poison")
 
     # w.coords returns the x1, y1, x2, y2 values respectively,
     # so get coords of the tail (last item in the snake list)
@@ -220,23 +256,31 @@ def startGame():
         x1, y1, x2, y2 = w.coords(snake[len(snake)-1])
         rectangle = w.create_rectangle(x1, y1, x2, y2, fill="Green")
         snake.append(rectangle)
-
-    def getScore():
-        global score
-        return score
-
+    # destroys current snake, cleans up score and
+    # direction sentinels, and calls statGame() again.
+    def reset():
+        global score, goingDown, goingUp, goingLeft
+        w.destroy()
+        score = 0
+        goingLeft = False
+        goingRight = False
+        goingUp = False
+        goingDown = False
+        startGame()
+        
     w.bind_all('<Key>', move_snake)
 
 # what's called when 'quit' is pressed:
 def stop():
     master.destroy()
+    print "Goodbye"
 
 # what's called when 'instructions' is pressed:
 def instructions():
     newwin = Toplevel(master)
     display = Label(newwin, text="The goal of The Snake game is to eat the fruit\n to make the snake longer. " \
                      "\n\nUse the arrow keys to move the \nsnake around the screen. " \
-                    "\n\nIf the snake's head touches any part of its body,\n the game is over, so be careful!",
+                    "\n\nIf the snake's head touches any part of its body, \n the game is over, so be careful!",
                     height=20, width=40)
     
     display.pack()
