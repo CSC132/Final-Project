@@ -9,6 +9,8 @@ speed = 0.05
 snakeLength = 3
 moveCount = 0
 
+# booleans will be used to help prevent changing
+# movement to the current opposite direction
 goingLeft = False
 goingRight = False
 goingUp = False
@@ -16,10 +18,12 @@ goingDown = False
 
 def startGame():
     global score
+    
     w = Canvas(master, width=600, height=550)
     w.grid(row=1, column=0, columnspan=3, sticky=N+E+W+S)
     master.attributes("-fullscreen", True)
-    
+
+    #scoreboard put on top of display
     scoreboard = Label(master, text="Score: {}".format(score))
     scoreboard.grid(row=0, column=1, sticky=N)
     
@@ -48,15 +52,16 @@ def startGame():
     foodY = choice(listY)
     poisonX = choice(listX)
     poisonY = choice(listY)
-    
+
+    # creating food and poison; changing their direction
+    # using a random value from the list of multiples of 10:
     food = w.create_oval(0, 0, 10, 10, fill="red", tags = "food")
     w.move(food, foodX, foodY)
     poison = w.create_oval(0, 0, 10, 10, fill="purple", tags="poison")
     w.move(poison, poisonX, poisonY)
+    
     # function called when an arrow key is pressed:
     def move_snake(event):
-  ##      global moveCount
-  ##      moveCount += 1
         if event.keysym == "Up":
             move_up()
         elif event.keysym == "Down":
@@ -138,18 +143,19 @@ def startGame():
                     sleep(speed)
                     w.update()
 
+    # checks collision between head and food/poison:
     def check_item():
         if w.bbox("head") == w.bbox("food"):
             food_toucher()
         elif w.bbox("head") == w.bbox("poison"):
             poison_toucher()
 
+    # this function moves the head, and keeps track of the
+    # coordinates of the previous body part. We need to keep
+    # track of the previous body parts because every body part
+    # but the head will be moving to the previous body part's
+    # coordinates.
     def move(x, y):
-        # this function moves the head, and keeps track of the
-        # coordinates of the previous body part. We need to keep
-        # track of the previous body parts because every body part
-        # but the head will be moving to the previous body part's
-        # coordinates.
         x1 = w.coords(head)[0]
         y1 = w.coords(head)[1]
         x2 = w.coords(head)[2]
@@ -158,10 +164,13 @@ def startGame():
         
         for i in range(1, len(snake)):
             x1, y1, x2, y2 = follow_head(i, x1, y1, x2, y2)
-            
+
+            # checking collision between head and other body parts:
             if w.coords(head) == w.coords(snake[i]):
                 reset()      
-                
+
+    # keeps track of every coordinate from all body parts
+    # and moves snake body according to its previous coords.
     def follow_head(i, x1, y1, x2, y2):
         newx1 = w.coords(snake[i])[0]
         newy1 = w.coords(snake[i])[1]
@@ -173,7 +182,9 @@ def startGame():
         x2 = newx2
         y2 = newy2
         return x1, y1, x2, y2            
-    
+
+    # handles score incrementing, speed changes,
+    # and new food/poison placement:
     def food_toucher():
         # gives the coordinates where the food was touched at:
         print "Food touched at:"
@@ -190,10 +201,10 @@ def startGame():
         
         
         global speed
-        if (score >= 5):
+        if (score >= 5 and score < 10):
             speed = 0.05/2
-        elif (score >= 15):
-            speed /= 0.25/2
+        elif (score >= 10):
+            speed = 0.05/4
 
         # new coordinates:
         food_x = choice(listX)
@@ -232,18 +243,12 @@ def startGame():
             speed *= 2
         elif (score <= 15):
             speed *= 2
-        
 
-        # new coordinates:
         food_x = choice(listX)
         food_y = choice(listY)
         poison_x = choice(listX)
         poison_y = choice(listY)
-        
-        
-        # relocates the food somewhere else in the canvas.
-        # to keep its size of 10 (decided upon create_oval creation) consistent,
-        # use new_x and new_x + 10 when plotting new x values, likewise for y.
+
         w.coords(food, food_x, food_y, food_x + 10, food_y + 10)
         w.coords(poison, poison_x, poison_y, poison_x + 10, poison_y + 10)
         print "new ones:"
@@ -256,6 +261,7 @@ def startGame():
         x1, y1, x2, y2 = w.coords(snake[len(snake)-1])
         rectangle = w.create_rectangle(x1, y1, x2, y2, fill="Green")
         snake.append(rectangle)
+        
     # destroys current snake, cleans up score and
     # direction sentinels, and calls statGame() again.
     def reset():
@@ -269,6 +275,7 @@ def startGame():
         startGame()
         
     w.bind_all('<Key>', move_snake)
+
 
 # what's called when 'quit' is pressed:
 def stop():
