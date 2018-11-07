@@ -1,6 +1,21 @@
 from Tkinter import *
 from time import sleep
 from random import randint, choice
+import RPi.GPIO as GPIO
+
+red = 27
+green = 18
+blue = 17
+
+GPIO.setmode(GPIO.BCM)
+
+GPIO.setup(red, GPIO.OUT)
+GPIO.setup(green, GPIO.OUT)
+GPIO.setup(blue, GPIO.OUT)
+
+GPIO.output(red, False)
+GPIO.output(blue, False)
+GPIO.output(green, True)
 
 master = Tk()
 
@@ -8,6 +23,8 @@ score = 0
 speed = 0.05
 snakeLength = 3
 moveCount = 0
+
+
 
 # booleans will be used to help prevent changing
 # movement to the current opposite direction
@@ -19,7 +36,7 @@ goingDown = False
 def startGame():
     global score
     
-    w = Canvas(master, width=600, height=550)
+    w = Canvas(master, width=800, height=440)
     w.grid(row=1, column=0, columnspan=3, sticky=N+E+W+S)
     master.attributes("-fullscreen", True)
 
@@ -45,8 +62,8 @@ def startGame():
     def f(x):
         return (x % 10 == 0)
 
-    listX = filter(f, range(10, 590))
-    listY = filter(f, range(10, 540))
+    listX = filter(f, range(10, 790))
+    listY = filter(f, range(10, 430))
 
     foodX = choice(listX)
     foodY = choice(listY)
@@ -97,9 +114,9 @@ def startGame():
 
         # only move down if it's not moving up
         if (goingUp == False):
-            while (w.coords(head)[3] <= 550):
+            while (w.coords(head)[3] <= 440):
                 # game over if it hits bottom
-                if (w.coords(head)[3] == 550):
+                if (w.coords(head)[3] == 440):
                     reset()
                 else:
                     check_item()
@@ -133,9 +150,9 @@ def startGame():
 
         # only move right if it's not moving left        
         if (goingLeft == False):
-            while (w.coords(head)[2] <= 600):
+            while (w.coords(head)[2] <= 800):
                 # game over if it hits right wall
-                if (w.coords(head)[2] == 600):
+                if (w.coords(head)[2] == 800):
                     reset()
                 else:
                     check_item()
