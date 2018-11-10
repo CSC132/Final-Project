@@ -15,16 +15,15 @@ GPIO.setup(blue, GPIO.OUT)
 
 GPIO.output(red, False)
 GPIO.output(blue, False)
-GPIO.output(green, True)
+GPIO.output(green, False)
 
 master = Tk()
 
+run = True
 score = 0
 speed = 0.05
 snakeLength = 3
 moveCount = 0
-
-
 
 # booleans will be used to help prevent changing
 # movement to the current opposite direction
@@ -35,8 +34,10 @@ goingDown = False
 
 def startGame():
     global score
-    
-    w = Canvas(master, width=800, height=440)
+    GPIO.output(green, True)
+
+    # canvas that runs the game:
+    w = Canvas(master, width=600, height=550)
     w.grid(row=1, column=0, columnspan=3, sticky=N+E+W+S)
     master.attributes("-fullscreen", True)
 
@@ -62,8 +63,8 @@ def startGame():
     def f(x):
         return (x % 10 == 0)
 
-    listX = filter(f, range(10, 790))
-    listY = filter(f, range(10, 430))
+    listX = filter(f, range(10, 590))
+    listY = filter(f, range(10, 540))
 
     foodX = choice(listX)
     foodY = choice(listY)
@@ -79,6 +80,9 @@ def startGame():
     
     # function called when an arrow key is pressed:
     def move_snake(event):
+        global run
+        run = True
+        
         if event.keysym == "Up":
             move_up()
         elif event.keysym == "Down":
@@ -89,14 +93,14 @@ def startGame():
             move_right()
 
     def move_up():
-        global goingDown, goingUp, goingLeft, goingRight
+        global goingDown, goingUp, goingLeft, goingRight, run
         goingUp = True
         goingRight = False
         goingLeft = False
 
         # only move up if it's not moving down
         if (goingDown == False):
-            while (w.coords(head)[1] >= 0):
+            while (run == True and w.coords(head)[1] >= 0):
                 # game over if it hits top
                 if (w.coords(head)[1] == 0):
                     reset()
@@ -107,16 +111,16 @@ def startGame():
                     w.update()
 
     def move_down():
-        global goingDown, goingUp, goingLeft, goingRight
+        global goingDown, goingUp, goingLeft, goingRight, run
         goingDown = True
         goingRight = False
         goingLeft = False
 
         # only move down if it's not moving up
         if (goingUp == False):
-            while (w.coords(head)[3] <= 440):
+            while (run == True and w.coords(head)[3] <= 550):
                 # game over if it hits bottom
-                if (w.coords(head)[3] == 440):
+                if (w.coords(head)[3] == 550):
                     reset()
                 else:
                     check_item()
@@ -125,14 +129,14 @@ def startGame():
                     w.update()
 
     def move_left():
-        global goingDown, goingUp, goingLeft, goingRight
+        global goingDown, goingUp, goingLeft, goingRight, run
         goingLeft = True
         goingUp = False
         goingDown = False
 
         # only move left if it's not moving right        
         if (goingRight == False):
-            while (w.coords(head)[0] >= 0):
+            while (run == True and w.coords(head)[0] >= 0):
                 # game over if it hits left wall
                 if (w.coords(head)[0] == 0):
                     reset()
@@ -143,16 +147,16 @@ def startGame():
                     w.update()
 
     def move_right():
-        global goingDown, goingUp, goingLeft, goingRight
+        global goingDown, goingUp, goingLeft, goingRight, run
         goingRight = True
         goingUp = False
         goingDown = False
 
         # only move right if it's not moving left        
         if (goingLeft == False):
-            while (w.coords(head)[2] <= 800):
+            while (run == True and w.coords(head)[2] <= 600):
                 # game over if it hits right wall
-                if (w.coords(head)[2] == 800):
+                if (w.coords(head)[2] == 600):
                     reset()
                 else:
                     check_item()
@@ -203,6 +207,12 @@ def startGame():
     # handles score incrementing, speed changes,
     # and new food/poison placement:
     def food_toucher():
+        # blink LED when it eats food:
+        GPIO.output(green, False)
+        sleep(0.1)
+        GPIO.output(green, True)
+        sleep(0.1)
+        
         # gives the coordinates where the food was touched at:
         print "Food touched at:"
         print w.bbox("head"), w.bbox("food")
@@ -239,6 +249,15 @@ def startGame():
         grow()
         
     def poison_toucher():
+        # blink LED red if it ate poison:
+        GPIO.output(green, False)
+        GPIO.output(red, True)
+        sleep(0.1)
+        GPIO.output(red, False)
+        sleep(0.1)
+        GPIO.output(green, True)
+
+        
         # gives the coordinates where the food was touched at:
         print "poison touched at:"
         print w.bbox("head"), w.bbox("poison")
@@ -282,20 +301,34 @@ def startGame():
     # destroys current snake, cleans up score and
     # direction sentinels, and calls statGame() again.
     def reset():
-        global score, goingDown, goingUp, goingLeft
+        global score, goingDown, goingUp, goingLeft, run
+
+        GPIO.output(green, False)
+        for i in range(0, 2):
+            GPIO.output(red, True)
+            sleep(0.5)
+            GPIO.output(red, False)
+            sleep(0.5)
+            
         w.destroy()
         score = 0
         goingLeft = False
         goingRight = False
         goingUp = False
         goingDown = False
+        run = False
         startGame()
         
     w.bind_all('<Key>', move_snake)
 
-
-# what's called when 'quit' is pressed:
+# what's called when 'quit' is pressed.
+# cleanup GPIO pins and sets run = False
+# so move function doesn't try to update
+# one last time after destroying mainloop:
 def stop():
+    global run
+    run = False   
+    GPIO.cleanup()
     master.destroy()
     print "Goodbye"
 
