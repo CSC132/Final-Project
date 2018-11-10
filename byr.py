@@ -37,7 +37,7 @@ def startGame():
     GPIO.output(green, True)
 
     # canvas that runs the game:
-    w = Canvas(master, width=600, height=550)
+    w = Canvas(master, width=800, height=450)
     w.grid(row=1, column=0, columnspan=3, sticky=N+E+W+S)
     master.attributes("-fullscreen", True)
 
@@ -63,8 +63,8 @@ def startGame():
     def f(x):
         return (x % 10 == 0)
 
-    listX = filter(f, range(10, 590))
-    listY = filter(f, range(10, 540))
+    listX = filter(f, range(10, 790))
+    listY = filter(f, range(10, 440))
 
     foodX = choice(listX)
     foodY = choice(listY)
@@ -118,9 +118,9 @@ def startGame():
 
         # only move down if it's not moving up
         if (goingUp == False):
-            while (run == True and w.coords(head)[3] <= 550):
+            while (run == True and w.coords(head)[3] <= 450):
                 # game over if it hits bottom
-                if (w.coords(head)[3] == 550):
+                if (w.coords(head)[3] == 450):
                     reset()
                 else:
                     check_item()
@@ -154,9 +154,9 @@ def startGame():
 
         # only move right if it's not moving left        
         if (goingLeft == False):
-            while (run == True and w.coords(head)[2] <= 600):
+            while (run == True and w.coords(head)[2] <= 800):
                 # game over if it hits right wall
-                if (w.coords(head)[2] == 600):
+                if (w.coords(head)[2] == 800):
                     reset()
                 else:
                     check_item()
@@ -207,27 +207,19 @@ def startGame():
     # handles score incrementing, speed changes,
     # and new food/poison placement:
     def food_toucher():
+        global score, speed
+        
         # blink LED when it eats food:
         GPIO.output(green, False)
         sleep(0.1)
         GPIO.output(green, True)
         sleep(0.1)
-        
-        # gives the coordinates where the food was touched at:
-        print "Food touched at:"
-        print w.bbox("head"), w.bbox("food")
 
-        # increments and prints score:
-        global score
         score += 1
-        print score
-        
         scoreboard.destroy()
         newScoreboard = Label(master, text="Score: {}".format(score))
-        newScoreboard.grid(row=0, column=1, sticky=N)
-        
-        
-        global speed
+        newScoreboard.grid(row=0, column=1, sticky=N)        
+
         if (score >= 5 and score < 10):
             speed = 0.05/2
         elif (score >= 10):
@@ -244,11 +236,11 @@ def startGame():
         # use new_x and new_x + 10 when plotting new x values, likewise for y.
         w.coords(food, food_x, food_y, food_x + 10, food_y + 10)
         w.coords(poison, poison_x, poison_y, poison_x + 10, poison_y + 10)
-        print "new ones:"
-        print w.bbox("head"), w.bbox("food")
         grow()
         
     def poison_toucher():
+        global score, speed
+        
         # blink LED red if it ate poison:
         GPIO.output(green, False)
         GPIO.output(red, True)
@@ -257,23 +249,12 @@ def startGame():
         sleep(0.1)
         GPIO.output(green, True)
 
-        
-        # gives the coordinates where the food was touched at:
-        print "poison touched at:"
-        print w.bbox("head"), w.bbox("poison")
-
-        # increments and prints score:
-        global score
-        score -= 1
-        print score
-        
+        score -= 1        
         scoreboard.destroy()
         newScoreboard = Label(master, text="Score: {}".format(score))
         newScoreboard.grid(row=0, column=1, sticky=N)
-
-        global speed            
+           
         if (score < 0):
-            print "You've been poisoned"
             reset()
         if (score <= 5):
             speed *= 2
@@ -287,8 +268,6 @@ def startGame():
 
         w.coords(food, food_x, food_y, food_x + 10, food_y + 10)
         w.coords(poison, poison_x, poison_y, poison_x + 10, poison_y + 10)
-        print "new ones:"
-        print w.bbox("head"), w.bbox("poison")
 
     # w.coords returns the x1, y1, x2, y2 values respectively,
     # so get coords of the tail (last item in the snake list)
@@ -330,7 +309,6 @@ def stop():
     run = False   
     GPIO.cleanup()
     master.destroy()
-    print "Goodbye"
 
 # what's called when 'instructions' is pressed:
 def instructions():
