@@ -37,7 +37,7 @@ def startGame():
     GPIO.output(green, True)
 
     # canvas that runs the game:
-    w = Canvas(master, width=800, height=450)
+    w = Canvas(master, width=800, height=440)
     w.grid(row=1, column=0, columnspan=3, sticky=N+E+W+S)
     master.attributes("-fullscreen", True)
 
@@ -64,7 +64,7 @@ def startGame():
         return (x % 10 == 0)
 
     listX = filter(f, range(10, 790))
-    listY = filter(f, range(10, 440))
+    listY = filter(f, range(10, 430))
 
     foodX = choice(listX)
     foodY = choice(listY)
@@ -118,9 +118,9 @@ def startGame():
 
         # only move down if it's not moving up
         if (goingUp == False):
-            while (run == True and w.coords(head)[3] <= 450):
+            while (run == True and w.coords(head)[3] <= 440):
                 # game over if it hits bottom
-                if (w.coords(head)[3] == 450):
+                if (w.coords(head)[3] == 440):
                     reset()
                 else:
                     check_item()
